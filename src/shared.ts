@@ -71,12 +71,8 @@ const V1_URL = "https://connect-js.stripe.com/v1.0/connect.js";
 
 export const findScript = (): HTMLScriptElement | null => {
   return (
-    document.querySelectorAll<HTMLScriptElement>(
-      `script[src="${V1_URL}"]`
-    )[0] ||
-    document.querySelectorAll<HTMLScriptElement>(
-      `script[src="${V0_URL}"]`
-    )[0] ||
+    document.querySelector<HTMLScriptElement>(`script[src="${V1_URL}"]`) ||
+    document.querySelector<HTMLScriptElement>(`script[src="${V0_URL}"]`) ||
     null
   );
 };
@@ -93,7 +89,7 @@ const injectScript = (): HTMLScriptElement => {
     );
   }
 
-  document.head.appendChild(script);
+  head.appendChild(script);
 
   return script;
 };
@@ -139,7 +135,7 @@ export const loadScript = (): Promise<StripeConnectWrapper> => {
 
       if (script) {
         console.warn(EXISTING_SCRIPT_MESSAGE);
-      } else if (!script) {
+      } else {
         script = injectScript();
       }
 
@@ -200,13 +196,13 @@ export const initStripeConnect = (
         ? ConnectElementCustomMethodConfig[tagName]
         : {};
       const methods = { ...customMethods, ...ConnectElementCommonMethodConfig };
-      for (const method in methods) {
+      Object.keys(methods).forEach((method) => {
         (element as any)[method] = function (value: any) {
           stripeConnectInstance.then(() => {
             this[`${method}InternalOnly`](value);
           });
         };
-      }
+      });
 
       stripeConnectInstance.then((instance) => {
         if (!element.isConnected && !(element as any).setConnector) {
