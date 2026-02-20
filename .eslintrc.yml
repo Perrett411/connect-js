@@ -30,4 +30,5 @@ rules:
   "@typescript-eslint/no-unused-vars":
     - 2
     - ignoreRestSiblings: true
+      argsIgnorePattern: "^_"
   "object-shorthand": ["error", "always"]
