@@ -71,12 +71,8 @@ const V1_URL = "https://connect-js.stripe.com/v1.0/connect.js";
 
 export const findScript = (): HTMLScriptElement | null => {
   return (
-    document.querySelectorAll<HTMLScriptElement>(
-      `script[src="${V1_URL}"]`
-    )[0] ||
-    document.querySelectorAll<HTMLScriptElement>(
-      `script[src="${V0_URL}"]`
-    )[0] ||
+    document.querySelector<HTMLScriptElement>(`script[src="${V1_URL}"]`) ||
+    document.querySelector<HTMLScriptElement>(`script[src="${V0_URL}"]`) ||
     null
   );
 };
@@ -93,7 +89,7 @@ const injectScript = (): HTMLScriptElement => {
     );
   }
 
-  document.head.appendChild(script);
+  head.appendChild(script);
 
   return script;
 };
@@ -139,7 +135,7 @@ export const loadScript = (): Promise<StripeConnectWrapper> => {
 
       if (script) {
         console.warn(EXISTING_SCRIPT_MESSAGE);
-      } else if (!script) {
+      } else {
         script = injectScript();
       }
 
@@ -200,7 +196,7 @@ export const initStripeConnect = (
         ? ConnectElementCustomMethodConfig[tagName]
         : {};
       const methods = { ...customMethods, ...ConnectElementCommonMethodConfig };
-      for (const method in methods) {
+      for (const method of Object.keys(methods)) {
         (element as any)[method] = function (value: any) {
           stripeConnectInstance.then(() => {
             this[`${method}InternalOnly`](value);
@@ -225,7 +221,7 @@ export const initStripeConnect = (
           element.style.display = oldDisplay;
         }
 
-        if (!element || !(element as any).setConnector) {
+        if (!(element as any).setConnector) {
           throw new Error(
             `Element ${tagName} was not transformed into a custom element. Are you using a documented component? See https://docs.stripe.com/connect/supported-embedded-components for a list of supported components`
           );
